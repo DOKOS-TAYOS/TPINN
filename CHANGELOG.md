@@ -14,3 +14,9 @@
   backend status with tests that prevent accidental misrepresentation.
 - Added `tnpinn sanity-check` to run short function-fitting, Laplace, benchmark,
   and analysis smoke checks with `sanity_report.md` and `sanity_summary.json`.
+- Fixed plain `pytest -q` collection by adding `src` to pytest's configured
+  Python path.
+- Removed the repo-local `.pytest_tmp` base temp setting so Windows test runs do
+  not fail when that directory is locked by another process.
+- Added a local pytest plugin that gives each test run a unique process-specific
+  temp base, avoiding locked Windows temp roots.

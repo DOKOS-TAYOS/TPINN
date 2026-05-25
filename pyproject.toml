@@ -38,4 +38,5 @@ target-version = "py310"
 select = ["E", "F", "I", "UP", "B"]
 
 [tool.pytest.ini_options]
-addopts = "--basetemp=.pytest_tmp"
+addopts = "-p tnpinn.pytest_plugin"
+pythonpath = ["src"]
