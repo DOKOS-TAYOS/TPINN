@@ -1,0 +1,13 @@
+base_config: configs/lorenz.yaml
+
+sweep:
+  name: lorenz_bond_sites_arch
+  grid:
+    model.feature_map.n_sites_per_coord.t: [8, 16, 24]
+    model.tensor_network.architecture: [global_mps, binary_ttn, branched_mps]
+    model.tensor_network.bond_dim: [2, 4, 8, 16]
+  fixed:
+    training.steps: 5000
+    training.n_collocation: 1024
+    eval.eval_every: 500
+    eval.grid_size: 1000

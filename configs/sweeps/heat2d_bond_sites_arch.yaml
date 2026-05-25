@@ -1,0 +1,15 @@
+base_config: configs/heat2d_laplace.yaml
+
+sweep:
+  name: heat2d_bond_sites_arch
+  grid:
+    model.feature_map.n_sites_per_coord.x: [4, 8, 12]
+    model.feature_map.n_sites_per_coord.y: [4, 8, 12]
+    model.tensor_network.architecture: [global_mps, coordinate_branch_mps, binary_ttn]
+    model.tensor_network.bond_dim: [2, 4, 8, 16]
+  fixed:
+    training.steps: 5000
+    training.n_collocation: 2048
+    training.n_boundary: 512
+    eval.eval_every: 500
+    eval.grid_size: 96

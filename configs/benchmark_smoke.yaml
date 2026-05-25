@@ -1,0 +1,31 @@
+suite:
+  name: benchmark_smoke
+  output_root: runs
+  max_parallel: 1
+
+  sweeps:
+    - name: heat2d_laplace_smoke
+      base_config: configs/heat2d_laplace.yaml
+      grid:
+        model.feature_map.n_sites_per_coord.x: [4]
+        model.feature_map.n_sites_per_coord.y: [4]
+        model.tensor_network.architecture: [global_mps, coordinate_branch_mps]
+        model.tensor_network.bond_dim: [2, 4]
+      fixed:
+        training.steps: 10
+        training.n_collocation: 64
+        training.n_boundary: 32
+        eval.eval_every: 5
+        eval.grid_size: 16
+
+    - name: lorenz_smoke
+      base_config: configs/lorenz.yaml
+      grid:
+        model.feature_map.n_sites_per_coord.t: [8]
+        model.tensor_network.architecture: [global_mps]
+        model.tensor_network.bond_dim: [4]
+      fixed:
+        training.steps: 10
+        training.n_collocation: 64
+        eval.eval_every: 5
+        eval.grid_size: 64

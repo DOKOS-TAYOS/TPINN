@@ -1,0 +1,16 @@
+base_config: configs/helmholtz_antenna2d.yaml
+
+sweep:
+  name: helmholtz_bond_sites_arch
+  grid:
+    problem.k: [3.141592653589793, 6.283185307179586]
+    model.feature_map.n_sites_per_coord.x: [8, 12]
+    model.feature_map.n_sites_per_coord.y: [8, 12]
+    model.tensor_network.architecture: [coordinate_branch_mps, binary_ttn]
+    model.tensor_network.bond_dim: [4, 8, 16]
+  fixed:
+    training.steps: 8000
+    training.n_collocation: 4096
+    training.n_boundary: 1024
+    eval.eval_every: 1000
+    eval.grid_size: 96

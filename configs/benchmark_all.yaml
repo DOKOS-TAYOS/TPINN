@@ -1,0 +1,59 @@
+suite:
+  name: benchmark_all
+  output_root: runs
+  max_parallel: 1
+
+  sweeps:
+    - name: heat2d_laplace_core
+      base_config: configs/heat2d_laplace.yaml
+      grid:
+        model.feature_map.kind: [fourier_sites, polynomial_sites]
+        model.feature_map.n_sites_per_coord.x: [4, 8, 12]
+        model.feature_map.n_sites_per_coord.y: [4, 8, 12]
+        model.tensor_network.architecture: [global_mps, coordinate_branch_mps, binary_ttn]
+        model.tensor_network.bond_dim: [2, 4, 8, 16]
+      fixed:
+        training.steps: 5000
+        training.n_collocation: 2048
+        training.n_boundary: 512
+        eval.eval_every: 500
+        eval.grid_size: 96
+
+    - name: heat2d_laplace_baselines
+      base_config: configs/heat2d_laplace.yaml
+      grid:
+        model.family: [baseline]
+        model.baseline: [mlp, siren]
+      fixed:
+        training.steps: 5000
+        training.n_collocation: 2048
+        training.n_boundary: 512
+        eval.eval_every: 500
+        eval.grid_size: 96
+
+    - name: lorenz_core
+      base_config: configs/lorenz.yaml
+      grid:
+        model.feature_map.n_sites_per_coord.t: [8, 16, 24]
+        model.tensor_network.architecture: [global_mps, binary_ttn, branched_mps]
+        model.tensor_network.bond_dim: [2, 4, 8, 16]
+      fixed:
+        training.steps: 5000
+        training.n_collocation: 1024
+        eval.eval_every: 500
+        eval.grid_size: 1000
+
+    - name: helmholtz_core
+      base_config: configs/helmholtz_antenna2d.yaml
+      grid:
+        problem.k: [3.141592653589793, 6.283185307179586]
+        model.feature_map.n_sites_per_coord.x: [8, 12]
+        model.feature_map.n_sites_per_coord.y: [8, 12]
+        model.tensor_network.architecture: [coordinate_branch_mps, binary_ttn]
+        model.tensor_network.bond_dim: [4, 8, 16]
+      fixed:
+        training.steps: 8000
+        training.n_collocation: 4096
+        training.n_boundary: 1024
+        eval.eval_every: 1000
+        eval.grid_size: 96
