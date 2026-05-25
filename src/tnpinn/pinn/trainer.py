@@ -15,6 +15,7 @@ from tnpinn.io.logging import MetricsWriter
 from tnpinn.io.run_dirs import make_run_dir
 from tnpinn.models import build_model
 from tnpinn.pinn.losses import compute_losses
+from tnpinn.pinn.metrics import relative_l2
 from tnpinn.problems import build_problem
 from tnpinn.problems.base import PhysicsProblem
 from tnpinn.tn.diagnostics import parameter_count, tensor_diagnostics
@@ -79,9 +80,8 @@ def _relative_metrics(
     with torch.no_grad():
         prediction = model(coords)
         error = prediction - reference
-        rel = error.norm() / (reference.norm() + 1.0e-12)
         max_abs = error.abs().max()
-    return float(rel.cpu()), float(max_abs.cpu())
+    return relative_l2(prediction, reference), float(max_abs.cpu())
 
 
 def _to_float(value: torch.Tensor | float) -> float:
@@ -173,6 +173,7 @@ def train(config: dict[str, Any], run_id: str | None = None, dry_run: bool = Fal
     run_dir.mkdir(parents=True, exist_ok=True)
     figures_dir = run_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
+    save_config(config, run_dir / "config.yaml")
     save_config(config, run_dir / "resolved_config.yaml")
 
     optimizer = torch.optim.Adam(

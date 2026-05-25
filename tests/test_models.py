@@ -18,7 +18,7 @@ def _small_config(architecture: str) -> dict:
                 "frequency_scale": 3.141592653589793,
             },
             "tensor_network": {
-                "backend": "tensorkrowch_nodes",
+                "backend": "tensorkrowch_hybrid",
                 "architecture": architecture,
                 "bond_dim": 3,
                 "branch_factor": 2,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import torch
@@ -16,9 +17,15 @@ class HelmholtzAntenna2D(PhysicsProblem):
         self.y_bounds = tuple(domain.get("y", [-1.0, 1.0]))
         self.k = float(problem.get("k", 3.141592653589793))
         self.source_sigma = float(problem.get("source_sigma", 0.2))
+        self.source_kind = str(problem.get("source_kind", "gaussian"))
         super().__init__("helmholtz_antenna2d", 2, 2, ("x", "y"))
 
     def source(self, coords: torch.Tensor) -> torch.Tensor:
+        if self.source_kind == "manufactured":
+            reference = self.reference_solution(coords)
+            if reference is None:
+                raise RuntimeError("manufactured source requires a reference solution")
+            return (self.k**2 - 2.0 * math.pi**2) * reference
         radius2 = coords[:, :1].square() + coords[:, 1:2].square()
         real = torch.exp(-radius2 / (2.0 * self.source_sigma**2))
         imag = torch.zeros_like(real)
@@ -72,3 +79,12 @@ class HelmholtzAntenna2D(PhysicsProblem):
         xx, yy = torch.meshgrid(axis, axis, indexing="ij")
         coords = torch.stack([xx.reshape(-1), yy.reshape(-1)], dim=1)
         return {"coords": coords, "shape": torch.tensor([n, n], device=device)}
+
+    def reference_solution(self, coords: torch.Tensor) -> torch.Tensor | None:
+        if self.source_kind != "manufactured":
+            return None
+        x = coords[:, :1]
+        y = coords[:, 1:2]
+        real = torch.sin(math.pi * x) * torch.sin(math.pi * y)
+        imag = torch.cos(math.pi * x) * torch.sin(math.pi * y)
+        return torch.cat([real, imag], dim=1)

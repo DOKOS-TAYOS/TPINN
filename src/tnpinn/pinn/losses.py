@@ -21,18 +21,34 @@ def compute_losses(
     weights: dict[str, Any],
 ) -> dict[str, torch.Tensor]:
     collocation = batches["collocation"]
+    boundary_weight = float(weights.get("boundary", 1.0))
+    initial_weight = float(weights.get("initial", 1.0))
+    data_weight = float(weights.get("data", 0.0))
+    regularization_weight = float(weights.get("regularization", 0.0))
     residual_values = problem.residual(model, collocation)
     loss_residual = residual_values.square().mean()
-    loss_boundary = problem.boundary_loss(model, batches["boundary"])
-    loss_initial = problem.initial_loss(model, batches["initial"])
+    loss_boundary = (
+        problem.boundary_loss(model, batches["boundary"])
+        if boundary_weight != 0.0
+        else torch.zeros_like(loss_residual)
+    )
+    loss_initial = (
+        problem.initial_loss(model, batches["initial"])
+        if initial_weight != 0.0
+        else torch.zeros_like(loss_residual)
+    )
     loss_data = torch.zeros_like(loss_residual)
-    loss_regularization = regularization_loss(model).to(loss_residual.device, loss_residual.dtype)
+    loss_regularization = (
+        regularization_loss(model).to(loss_residual.device, loss_residual.dtype)
+        if regularization_weight != 0.0
+        else torch.zeros_like(loss_residual)
+    )
     loss_total = (
         float(weights.get("residual", 1.0)) * loss_residual
-        + float(weights.get("boundary", 1.0)) * loss_boundary
-        + float(weights.get("initial", 1.0)) * loss_initial
-        + float(weights.get("data", 0.0)) * loss_data
-        + float(weights.get("regularization", 0.0)) * loss_regularization
+        + boundary_weight * loss_boundary
+        + initial_weight * loss_initial
+        + data_weight * loss_data
+        + regularization_weight * loss_regularization
     )
     return {
         "loss_total": loss_total,

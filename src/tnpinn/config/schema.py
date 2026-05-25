@@ -22,7 +22,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
             "include_identity_site": False,
         },
         "tensor_network": {
-            "backend": "tensorkrowch_nodes",
+            "backend": "tensorkrowch_hybrid",
             "architecture": "coordinate_branch_mps",
             "bond_dim": 8,
             "branch_factor": 2,

@@ -23,6 +23,10 @@ def _set_nested_value(config: dict[str, Any], dotted_key: str, value: Any) -> No
     cursor[parts[-1]] = value
 
 
+def _format_overrides(values: dict[str, Any]) -> list[str]:
+    return [_format_override(key, value) for key, value in values.items()]
+
+
 def _format_override(key: str, value: Any) -> str:
     if isinstance(value, bool):
         text = "true" if value else "false"
@@ -33,6 +37,14 @@ def _format_override(key: str, value: Any) -> str:
     else:
         text = str(value)
     return f"{key}={text}"
+
+
+def _fixed_overrides(fixed: dict[str, Any], grid: dict[str, list[Any]]) -> list[str]:
+    conflicts = sorted(set(fixed).intersection(grid))
+    if conflicts:
+        conflict_list = ", ".join(conflicts)
+        raise ValueError(f"Keys cannot appear in both fixed and grid: {conflict_list}")
+    return _format_overrides(fixed)
 
 
 def expand_grid(grid: dict[str, list[Any]]) -> list[list[str]]:
@@ -49,13 +61,15 @@ def load_sweep_jobs(path: str | Path) -> list[dict[str, Any]]:
     base_config = raw["base_config"]
     sweep = raw.get("sweep", raw)
     grid = sweep.get("grid", {})
+    fixed = sweep.get("fixed", {})
+    fixed_overrides = _fixed_overrides(fixed, grid)
     jobs = []
     for index, overrides in enumerate(expand_grid(grid), start=1):
         jobs.append(
             {
                 "name": f"{sweep.get('name', Path(path).stem)}_{index:04d}",
                 "base_config": base_config,
-                "overrides": overrides,
+                "overrides": [*fixed_overrides, *overrides],
             }
         )
     return jobs
@@ -67,12 +81,14 @@ def load_benchmark_jobs(path: str | Path) -> list[dict[str, Any]]:
     jobs: list[dict[str, Any]] = []
     for sweep in suite.get("sweeps", []):
         grid = sweep.get("grid", {})
+        fixed = sweep.get("fixed", {})
+        fixed_overrides = _fixed_overrides(fixed, grid)
         for index, overrides in enumerate(expand_grid(grid), start=1):
             jobs.append(
                 {
                     "name": f"{sweep.get('name', 'benchmark')}_{index:04d}",
                     "base_config": sweep["base_config"],
-                    "overrides": overrides,
+                    "overrides": [*fixed_overrides, *overrides],
                 }
             )
     return jobs

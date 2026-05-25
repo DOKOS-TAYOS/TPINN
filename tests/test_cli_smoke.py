@@ -49,6 +49,8 @@ def test_train_sweep_benchmark_and_analyze_cli(tmp_path: Path) -> None:
     assert len(summaries) == 1
     summary = json.loads(summaries[0].read_text(encoding="utf-8"))
     assert summary["status"] == "completed"
+    assert (summaries[0].parent / "config.yaml").exists()
+    assert (summaries[0].parent / "resolved_config.yaml").exists()
     assert (summaries[0].parent / "metrics.csv").exists()
     assert (summaries[0].parent / "checkpoint_last.pt").exists()
     assert (summaries[0].parent / "figures").exists()

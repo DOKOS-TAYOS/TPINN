@@ -7,7 +7,9 @@ import tensorkrowch as tk
 import torch
 
 
-class TensorKrowchBackendBase(torch.nn.Module):
+class TensorKrowchHybridBackendBase(torch.nn.Module):
+    """Hybrid backend: TensorKrowch site projections plus torch bond contractions."""
+
     def __init__(
         self, site_dim: int, output_dim: int, bond_dim: int, init_std: float = 0.05
     ) -> None:
@@ -82,12 +84,13 @@ class TensorKrowchBackendBase(torch.nn.Module):
     def diagnostics(self) -> dict[str, float | int | str]:
         return {
             "bond_dim": self.bond_dim,
+            "contraction_kind": "hybrid_site_nodes_torch_bonds",
             "site_dim": self.site_dim,
-            "tn_backend": "tensorkrowch_nodes",
+            "tn_backend": "tensorkrowch_hybrid",
         }
 
 
-class GlobalMPSBackend(TensorKrowchBackendBase):
+class GlobalMPSHybridBackend(TensorKrowchHybridBackendBase):
     def __init__(
         self,
         n_sites: int,
@@ -121,7 +124,7 @@ class GlobalMPSBackend(TensorKrowchBackendBase):
         return values
 
 
-class CoordinateBranchMPSBackend(TensorKrowchBackendBase):
+class CoordinateBranchMPSHybridBackend(TensorKrowchHybridBackendBase):
     def __init__(
         self,
         site_slices: dict[str, slice],
@@ -177,7 +180,7 @@ class CoordinateBranchMPSBackend(TensorKrowchBackendBase):
         return values
 
 
-class BinaryTTNBackend(TensorKrowchBackendBase):
+class BinaryTTNHybridBackend(TensorKrowchHybridBackendBase):
     def __init__(
         self,
         n_sites: int,
@@ -224,7 +227,7 @@ class BinaryTTNBackend(TensorKrowchBackendBase):
         return values
 
 
-class BranchedMPSBackend(TensorKrowchBackendBase):
+class BranchedMPSHybridBackend(TensorKrowchHybridBackendBase):
     def __init__(
         self,
         n_sites: int,

@@ -15,6 +15,11 @@ class Heat2DLaplace(PhysicsProblem):
         domain = problem.get("domain", {})
         self.x_bounds = tuple(domain.get("x", [0.0, 1.0]))
         self.y_bounds = tuple(domain.get("y", [0.0, 1.0]))
+        default_boundary_mode = (
+            "hard" if bool(problem.get("use_hard_constraints", False)) else "soft"
+        )
+        self.boundary_mode = str(problem.get("boundary_mode", default_boundary_mode))
+        self.soft_boundary_with_hard = bool(problem.get("soft_boundary_with_hard", False))
         super().__init__("heat2d_laplace", 2, 1, ("x", "y"))
 
     def sample_collocation(
@@ -46,6 +51,12 @@ class Heat2DLaplace(PhysicsProblem):
         coords = ensure_requires_grad(batch["coords"])
         u = model(coords)[:, :1]
         return -laplacian(u, coords, dims=(0, 1))
+
+    def boundary_loss(self, model: ModelLike, batch: dict[str, torch.Tensor]) -> torch.Tensor:
+        coords = batch["coords"]
+        if self.boundary_mode == "hard" and not self.soft_boundary_with_hard:
+            return torch.zeros((), device=coords.device, dtype=coords.dtype)
+        return super().boundary_loss(model, batch)
 
     def reference_solution(self, coords: torch.Tensor) -> torch.Tensor:
         x = coords[:, :1]

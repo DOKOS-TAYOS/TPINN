@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from tnpinn.cli import analyze, benchmark, evaluate, plot, sweep, train
+from tnpinn.cli import analyze, benchmark, evaluate, plot, sanity_check, sweep, train
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -14,6 +14,7 @@ def main(argv: list[str] | None = None) -> None:
     subparsers.add_parser("evaluate", help="evaluate one run")
     subparsers.add_parser("analyze", help="aggregate runs")
     subparsers.add_parser("plot", help="regenerate run figures")
+    subparsers.add_parser("sanity-check", help="run a short end-to-end sanity suite")
     args, rest = parser.parse_known_args(argv)
     dispatch = {
         "train": train.main,
@@ -22,6 +23,7 @@ def main(argv: list[str] | None = None) -> None:
         "evaluate": evaluate.main,
         "analyze": analyze.main,
         "plot": plot.main,
+        "sanity-check": sanity_check.main,
     }
     dispatch[args.command](rest)
 

@@ -33,8 +33,9 @@ class TorchReferenceBase(torch.nn.Module):
     def diagnostics(self) -> dict[str, float | int | str]:
         return {
             "bond_dim": self.bond_dim,
+            "contraction_kind": "torch_reference",
             "site_dim": self.site_dim,
-            "tn_backend": "torch_einsum_reference",
+            "tn_backend": "torch_reference",
         }
 
 

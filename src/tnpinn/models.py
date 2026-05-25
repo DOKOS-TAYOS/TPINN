@@ -8,11 +8,12 @@ from tnpinn.baselines import MLP, SIREN
 from tnpinn.problems.base import PhysicsProblem
 from tnpinn.tn.feature_maps import SiteFeatureMap, build_feature_map
 from tnpinn.tn.tensorkrowch_backend import (
-    BinaryTTNBackend,
-    BranchedMPSBackend,
-    CoordinateBranchMPSBackend,
-    GlobalMPSBackend,
+    BinaryTTNHybridBackend,
+    BranchedMPSHybridBackend,
+    CoordinateBranchMPSHybridBackend,
+    GlobalMPSHybridBackend,
 )
+from tnpinn.tn.tensorkrowch_full_backend import TensorKrowchFullBackend
 from tnpinn.tn.torch_reference_backend import (
     TorchReferenceBinaryTTN,
     TorchReferenceBranchedMPS,
@@ -48,6 +49,16 @@ class TensorNetworkPINN(torch.nn.Module):
         return diagnostics
 
 
+class OutputTransformedModel(torch.nn.Module):
+    def __init__(self, model: torch.nn.Module, output_transform: torch.nn.Module) -> None:
+        super().__init__()
+        self.model = model
+        self.output_transform = output_transform
+
+    def forward(self, coords: torch.Tensor) -> torch.Tensor:
+        return self.output_transform(coords, self.model(coords))
+
+
 class HeatLaplaceHardConstraint(torch.nn.Module):
     def forward(self, coords: torch.Tensor, raw: torch.Tensor) -> torch.Tensor:
         x = coords[:, :1]
@@ -67,13 +78,21 @@ def _make_tn_backend(
     branch_factor = int(tn_config.get("branch_factor", 2))
 
     if backend_name == "tensorkrowch_nodes":
+        raise ValueError(
+            "Tensor-network backend 'tensorkrowch_nodes' was renamed to "
+            "'tensorkrowch_hybrid' because it is a hybrid implementation, not a full "
+            "TensorKrowch contraction backend."
+        )
+    if backend_name == "tensorkrowch_full":
+        return TensorKrowchFullBackend(architecture)
+    if backend_name == "tensorkrowch_hybrid":
         classes = {
-            "global_mps": GlobalMPSBackend,
-            "coordinate_branch_mps": CoordinateBranchMPSBackend,
-            "binary_ttn": BinaryTTNBackend,
-            "branched_mps": BranchedMPSBackend,
+            "global_mps": GlobalMPSHybridBackend,
+            "coordinate_branch_mps": CoordinateBranchMPSHybridBackend,
+            "binary_ttn": BinaryTTNHybridBackend,
+            "branched_mps": BranchedMPSHybridBackend,
         }
-    elif backend_name == "torch_einsum_reference":
+    elif backend_name in {"torch_reference", "torch_einsum_reference"}:
         classes = {
             "global_mps": TorchReferenceGlobalMPS,
             "coordinate_branch_mps": TorchReferenceCoordinateBranchMPS,
@@ -101,6 +120,14 @@ def _make_tn_backend(
     return cls(feature_map.n_sites_total, feature_map.site_dim, output_dim, bond_dim, init_std)
 
 
+def _uses_laplace_hard_constraint(config: dict[str, Any], problem: PhysicsProblem) -> bool:
+    problem_config = config.get("problem", {})
+    return problem.name == "heat2d_laplace" and (
+        problem_config.get("boundary_mode") == "hard"
+        or bool(problem_config.get("use_hard_constraints", False))
+    )
+
+
 def build_model(config: dict[str, Any], problem: PhysicsProblem) -> torch.nn.Module:
     model_config = config.get("model", {})
     family = str(model_config.get("family", "tensor_network"))
@@ -111,21 +138,23 @@ def build_model(config: dict[str, Any], problem: PhysicsProblem) -> torch.nn.Mod
         hidden_dim = int(model_config.get("hidden_dim", 64))
         n_layers = int(model_config.get("n_layers", 3))
         if baseline == "siren":
-            return SIREN(problem.input_dim, output_dim, hidden_dim, n_layers)
-        return MLP(problem.input_dim, output_dim, hidden_dim, n_layers)
+            base_model: torch.nn.Module = SIREN(problem.input_dim, output_dim, hidden_dim, n_layers)
+        else:
+            base_model = MLP(problem.input_dim, output_dim, hidden_dim, n_layers)
+        if _uses_laplace_hard_constraint(config, problem):
+            return OutputTransformedModel(base_model, HeatLaplaceHardConstraint())
+        return base_model
 
     feature_map = build_feature_map(model_config.get("feature_map", {}), problem.coordinates)
     tn_config = model_config.get("tensor_network", {})
     backend = _make_tn_backend(
-        str(tn_config.get("backend", "tensorkrowch_nodes")),
+        str(tn_config.get("backend", "tensorkrowch_hybrid")),
         str(tn_config.get("architecture", "coordinate_branch_mps")),
         feature_map,
         output_dim,
         tn_config,
     )
     output_transform = None
-    if problem.name == "heat2d_laplace" and bool(
-        config.get("problem", {}).get("use_hard_constraints", False)
-    ):
+    if _uses_laplace_hard_constraint(config, problem):
         output_transform = HeatLaplaceHardConstraint()
     return TensorNetworkPINN(feature_map, backend, output_transform)

@@ -28,7 +28,7 @@ model:
     include_identity_site: false
 
   tensor_network:
-    backend: tensorkrowch_nodes
+    backend: tensorkrowch_hybrid
     architecture: coordinate_branch_mps
     bond_dim: 12
     branch_factor: 2
