@@ -38,7 +38,6 @@ El repositorio debe permitir:
 - Typer para CLI.
 - pytest.
 - rich, opcional, para logs.
-- tqdm, opcional.
 
 ## Estructura esperada
 

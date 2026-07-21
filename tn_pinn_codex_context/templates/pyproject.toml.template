@@ -18,7 +18,6 @@ dependencies = [
     "pyyaml",
     "typer",
     "rich",
-    "tqdm",
 ]
 
 [project.optional-dependencies]
