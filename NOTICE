@@ -1,0 +1,26 @@
+TPINN / tnpinn
+Copyright (c) 2026 Alejandro Mata Ali
+
+This project is released under the MIT License (see LICENSE).
+
+Third-party runtime and development dependencies remain under their own
+licenses and terms. Installing this package does not relicense those
+dependencies. Review each dependency's license before redistribution.
+
+Key dependencies and typical licenses (verify with the installed package):
+
+- PyTorch (torch) — BSD-style (see the PyTorch project license notices)
+- TensorKrowch (tensorkrowch) — MIT (https://github.com/joserapa98/tensorkrowch)
+- NumPy — BSD-3-Clause (and related permissive notices in the distribution)
+- pandas — BSD-3-Clause
+- matplotlib — matplotlib license (PSF-based / BSD-compatible terms)
+- PyYAML — MIT
+- pytest, ruff (optional dev extras) — MIT
+
+No third-party library source trees are vendored in this repository. Imports
+of torch, tensorkrowch, and the scientific Python stack are ordinary package
+dependencies.
+
+The optional SIREN baseline in this repository is an independent
+reimplementation of the architecture described by Sitzmann et al.; it is not
+a port or copy of upstream SIREN source code. See README.md and CITATION.cff.

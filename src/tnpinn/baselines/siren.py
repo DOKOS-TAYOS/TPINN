@@ -1,3 +1,9 @@
+"""Independent SIREN-style baseline (Sitzmann et al., NeurIPS 2020).
+
+This is a small reimplementation of the architecture for local experiments,
+not a port of upstream SIREN source code. See README.md and CITATION.cff.
+"""
+
 from __future__ import annotations
 
 import math

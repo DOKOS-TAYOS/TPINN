@@ -7,6 +7,10 @@ name = "tnpinn"
 version = "0.1.0"
 description = "Physics-informed neural networks based on tensor networks."
 readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Alejandro Mata Ali", email = "alejandro.mata.ali@gmail.com"},
+]
 requires-python = ">=3.10"
 dependencies = [
     "torch",

@@ -15,3 +15,25 @@ tnpinn benchmark --suite configs/benchmark_all.yaml --dry-run --limit 10
 tnpinn analyze --runs runs --out reports/latest
 ```
 
+## License
+
+This project is released under the [MIT License](LICENSE). Third-party
+dependencies keep their own licenses; see [NOTICE](NOTICE).
+
+## Citing and acknowledgments
+
+If you use this software in scholarly work, cite this repository
+([`CITATION.cff`](CITATION.cff)) and, as applicable, the methods below.
+
+**SIREN baseline.** The optional `siren` baseline is an independent
+reimplementation of the SIREN architecture (periodic activations / related
+initialization), not a port or copy of upstream SIREN source code:
+
+- V. Sitzmann, J. N. P. Martel, A. W. Bergman, D. B. Lindell, and G. Wetzstein,
+  “Implicit Neural Representations with Periodic Activation Functions,”
+  NeurIPS 2020. https://arxiv.org/abs/2006.09661
+
+**Tensor networks.** The default TN backend depends on TensorKrowch
+(https://github.com/joserapa98/tensorkrowch). Runtime also uses PyTorch and the
+usual scientific Python stack listed in `NOTICE`.
+

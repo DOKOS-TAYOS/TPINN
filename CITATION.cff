@@ -1,0 +1,54 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite it and acknowledge the methods and
+  libraries listed in README.md and NOTICE.
+title: "tnpinn (TPINN)"
+type: software
+authors:
+  - family-names: Mata Ali
+    given-names: Alejandro
+    email: alejandro.mata.ali@gmail.com
+license: MIT
+repository-code: "https://github.com/DOKOS-TAYOS/TPINN"
+abstract: >-
+  Physics-informed neural networks based on differentiable tensor networks,
+  with optional MLP and SIREN baselines.
+keywords:
+  - physics-informed neural networks
+  - tensor networks
+  - PINN
+  - TensorKrowch
+  - PyTorch
+references:
+  - type: article
+    title: "Implicit Neural Representations with Periodic Activation Functions"
+    authors:
+      - family-names: Sitzmann
+        given-names: Vincent
+      - family-names: Martel
+        given-names: Julien N. P.
+      - family-names: Bergman
+        given-names: Alexander W.
+      - family-names: Lindell
+        given-names: David B.
+      - family-names: Wetzstein
+        given-names: Gordon
+    year: 2020
+    journal: "Advances in Neural Information Processing Systems"
+    volume: "33"
+    doi: "10.48550/arXiv.2006.09661"
+    url: "https://arxiv.org/abs/2006.09661"
+    notes: >-
+      SIREN architecture. The baseline in this repository is an independent
+      reimplementation of the method, not a port of upstream SIREN source code.
+  - type: software
+    title: "TensorKrowch"
+    authors:
+      - family-names: Ramos-Calderer
+        given-names: José
+    notes: Primary tensor-network backend dependency (MIT).
+    url: "https://github.com/joserapa98/tensorkrowch"
+  - type: software
+    title: "PyTorch"
+    notes: Autograd and neural-network runtime dependency.
+    url: "https://pytorch.org/"
